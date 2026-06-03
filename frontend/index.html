@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gitty — GitHub Repo Reader</title>
+<title>Gitty — Repo Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -36,7 +36,6 @@
     overflow-x: hidden;
   }
 
-  /* Grid background */
   body::before {
     content: '';
     position: fixed;
@@ -49,7 +48,6 @@
     z-index: 0;
   }
 
-  /* ── HEADER ── */
   header {
     position: relative;
     z-index: 10;
@@ -99,7 +97,6 @@
 
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  /* ── LAYOUT ── */
   .main {
     position: relative;
     z-index: 1;
@@ -109,7 +106,6 @@
     min-height: calc(100vh - 60px);
   }
 
-  /* ── SIDEBAR ── */
   .sidebar {
     border-right: 1px solid var(--border);
     padding: 1.5rem;
@@ -219,7 +215,6 @@
     font-family: 'IBM Plex Mono', monospace;
   }
 
-  /* ── CHAT AREA ── */
   .chat-area {
     display: flex;
     flex-direction: column;
@@ -236,7 +231,6 @@
     scroll-behavior: smooth;
   }
 
-  /* Empty state */
   .empty-state {
     flex: 1;
     display: flex;
@@ -284,7 +278,6 @@
     color: var(--accent2);
   }
 
-  /* Messages */
   .msg {
     display: flex;
     flex-direction: column;
@@ -321,7 +314,6 @@
     border-color: var(--border2);
   }
 
-  /* Markdown-like rendering */
   .msg-bubble code {
     font-family: 'IBM Plex Mono', monospace;
     background: var(--code-bg);
@@ -419,7 +411,6 @@
     40%{transform:translateY(-6px)}
   }
 
-  /* ── INPUT BAR ── */
   .input-bar {
     border-top: 1px solid var(--border);
     padding: 1rem 2rem;
@@ -489,7 +480,7 @@
 
 <div class="main">
 
-  <!-- ── SIDEBAR ── -->
+  <!-- Sidebar -->
   <aside class="sidebar">
 
     <div>
@@ -503,7 +494,7 @@
     <div>
       <div class="sidebar-section-title">Index stats</div>
       <div class="stat-grid">
-        <div class="stat-box">
+         <div class="stat-box">
           <div class="val" id="statFiles">—</div>
           <div class="lbl">files</div>
         </div>
@@ -531,14 +522,14 @@
 
   </aside>
 
-  <!-- ── CHAT ── -->
+  <!-- Chat -->
   <div class="chat-area">
     <div class="messages" id="messages">
       <div class="empty-state" id="emptyState">
         <div class="empty-icon">⬡</div>
-        <div class="empty-title">Index a repo, then ask anything</div>
+        <div class="empty-title">Index a repository folder to begin</div>
         <p style="font-size:13px;max-width:360px;line-height:1.6">
-          Point it at any local folder or cloned GitHub repo. Gitty reads every file, understands the code, and answers your questions like a senior dev.
+          Provide a local project path. Gitty will index the codebase files and answer context-specific questions.
         </p>
         <div class="suggestions">
           <span class="suggestion-chip" onclick="fillQuestion('How does this project work?')">How does this work?</span>
@@ -562,8 +553,7 @@
 <script>
 const API = "http://127.0.0.1:8000";
 
-
-// ── Render simple markdown ────────────────────────────────────────────────
+// Render simple markdown tags
 function renderMarkdown(text) {
   return text
     .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
@@ -574,7 +564,7 @@ function renderMarkdown(text) {
     .replace(/\n/g, '<br>');
 }
 
-// ── Status bar ───────────────────────────────────────────────────────────
+// Fetch API server health status
 async function refreshStatus() {
   try {
     const res = await fetch(`${API}/health`);
@@ -595,17 +585,17 @@ async function refreshStatus() {
   }
 }
 
-// ── Index folder ─────────────────────────────────────────────────────────
+// Index folder path
 async function indexFolder() {
   const folder = document.getElementById('folderInput').value.trim();
-  if (!folder) { alert('Please enter a folder path first.'); return; }
+  if (!folder) { alert('Please enter a folder path.'); return; }
 
   const btn = document.getElementById('indexBtn');
   const log = document.getElementById('indexLog');
   btn.disabled = true;
   btn.textContent = '⏳ Indexing…';
   log.className = 'index-log visible';
-  log.textContent = '> Starting indexing...\n> (First run downloads ~170MB of models)\n';
+  log.textContent = '> Starting codebase indexing...\n';
   document.getElementById('statusDot').className = 'status-dot loading';
 
   try {
@@ -617,22 +607,22 @@ async function indexFolder() {
     const data = await res.json();
 
     if (res.ok) {
-      log.textContent += `> ✓ Indexed ${data.files_indexed} files\n> ✓ Created ${data.chunks_created} chunks\n> Ready!`;
+      log.textContent += `> Indexed ${data.files_indexed} files\n> Created ${data.chunks_created} chunks\n> System ready.`;
       document.getElementById('statFiles').textContent = data.files_indexed;
       document.getElementById('statChunks').textContent = data.chunks_created.toLocaleString();
       refreshStatus();
     } else {
-      log.textContent += `> ✗ Error: ${data.detail}`;
+      log.textContent += `> Error: ${data.detail}`;
     }
   } catch(e) {
-    log.textContent += `> ✗ Could not reach server. Is it running?\n> Run: uvicorn backend.api:app --reload`;
+    log.textContent += `> Connection failed. Verify FastAPI server is running on ${API}.\n`;
   }
 
   btn.disabled = false;
   btn.textContent = '⚡ Index folder';
 }
 
-// ── Add message to chat ───────────────────────────────────────────────────
+// Add chat message bubble
 function addMessage(role, content, sources = []) {
   const empty = document.getElementById('emptyState');
   if (empty) empty.remove();
@@ -678,7 +668,7 @@ function addThinking() {
   msgs.scrollTop = msgs.scrollHeight;
 }
 
-// ── Ask question ─────────────────────────────────────────────────────────
+// Post query to ask endpoint
 async function askQuestion() {
   const input = document.getElementById('questionInput');
   const query = input.value.trim();
@@ -702,11 +692,11 @@ async function askQuestion() {
     if (res.ok) {
       addMessage('assistant', data.answer, data.sources);
     } else {
-      addMessage('assistant', `❌ Error: ${data.detail}`);
+      addMessage('assistant', `Error: ${data.detail}`);
     }
   } catch(e) {
     document.getElementById('thinking')?.remove();
-    addMessage('assistant', '❌ Could not reach the server. Make sure it is running:\n\n```\nuvicorn backend.api:app --reload\n```');
+    addMessage('assistant', 'Connection failed. Verify FastAPI server is running on ' + API);
   }
 
   document.getElementById('sendBtn').disabled = false;
@@ -725,7 +715,7 @@ function clearChat() {
   </div>`;
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────
+// Init
 refreshStatus();
 setInterval(refreshStatus, 10000);
 </script>

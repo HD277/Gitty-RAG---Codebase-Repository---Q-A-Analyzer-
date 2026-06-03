@@ -1,26 +1,16 @@
-"""
-main.py — Run this file to start the whole application.
-
-Usage:
-  python main.py
-"""
-
 import os
 import sys
 import subprocess
 from pathlib import Path
 
 def check_env():
-    """Make sure the .env file exists and has an API key."""
     env_file = Path(".env")
     if not env_file.exists():
-        print("──────────────────────────────────────────────────")
-        print(" .env file not found!")
-        print(" Copy .env.example to .env and add your API key.")
-        print("──────────────────────────────────────────────────")
+        print("Error: .env file not found.")
+        print("Please copy .env.example to .env and configure your GEMINI_API_KEY.")
         sys.exit(1)
 
-    # Load the .env file manually
+    # Load env variables from local .env
     with open(env_file) as f:
         for line in f:
             line = line.strip()
@@ -28,27 +18,19 @@ def check_env():
                 key, val = line.split("=", 1)
                 os.environ.setdefault(key.strip(), val.strip())
 
-    if os.environ.get("GEMINI_API_KEY", "").startswith("your_"):
-        print("──────────────────────────────────────────────────")
-        print(" Please set your real GEMINI_API_KEY in .env")
-        print("──────────────────────────────────────────────────")
+    if not os.environ.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY").startswith("your_"):
+        print("Error: GEMINI_API_KEY is not set or has placeholder value in .env.")
         sys.exit(1)
 
-    print("[✓] Environment loaded")
+    print("Environment successfully loaded.")
 
 if __name__ == "__main__":
     check_env()
-    print()
-    print("╔══════════════════════════════════════════════════╗")
-    print("║   🐱 Gitty — GitHub Repo Reader                  ║")
-    print("╚══════════════════════════════════════════════════╝")
-    print()
-    print("[→] Starting API server on http://localhost:8000")
-    print("[→] Open frontend/index.html in your browser to use Gitty")
-    print("[→] Press Ctrl+C to stop")
+    print("Starting server on http://localhost:8000")
+    print("Open frontend/index.html in browser to access frontend.")
+    print("Press Ctrl+C to stop.")
     print()
 
-    # Start FastAPI server
     subprocess.run([
         sys.executable, "-m", "uvicorn",
         "backend.api:app",

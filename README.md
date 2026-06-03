@@ -1,51 +1,44 @@
-#  Gitty — AI-Powered GitHub Repo & Local Codebase Reader
+# Gitty — Local Codebase QA Assistant
 
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Gemini](https://img.shields.io/badge/Gemini_API-2.5_Flash-4285F4?logo=google&logoColor=white)](https://aistudio.google.com/)
+[![Gemini](https://img.shields.io/badge/Gemini_API-1.5_Flash-4285F4?logo=google&logoColor=white)](https://aistudio.google.com/)
 [![ChromaDB](https://img.shields.io/badge/Vector_DB-ChromaDB-orange)](https://www.trychroma.com/)
 
-**Gitty** is a production-quality RAG (Retrieval-Augmented Generation) system that allows you to ask plain-English questions about any GitHub repository or local code folder. 
-
-No more spending hours reading through unfamiliar codebases. Point Gitty at any local folder, and it will index all files, understand the project architecture, and answer questions like a senior developer who knows the entire codebase.
+Gitty is a lightweight RAG (Retrieval-Augmented Generation) application designed to search and analyze local source code folders or cloned repositories using Gemini. It parses directory files, indexes their contents locally, and answers functional queries about the codebase with code citations.
 
 ---
 
-##  Showcase & User Interface
+## Showcase & User Interface
 
-Here is a visual walkthrough of Gitty in action. You can save your screenshots inside the [`assets/`](./assets/) folder with the names below to render them on GitHub:
+Here is a visual walkthrough of Gitty in action:
 
-### 1. Landing Page (Empty State)
-When you first open Gitty, you are greeted with a beautiful glassmorphic dark-theme UI. It checks if the backend is running, displays suggestion chips, and indicates if the server is offline or online.
-!<img width="1335" height="599" alt="Screenshot (31)" src="https://github.com/user-attachments/assets/949498fa-4786-46a2-8ec9-8aefacd9da57" />
+### 1. Initial State
+When first opened, Gitty presents a clean interface. It validates server availability, displays suggestion queries, and indicates connectivity status.
+<img width="1335" height="599" alt="Gitty Initial State" src="https://github.com/user-attachments/assets/949498fa-4786-46a2-8ec9-8aefacd9da57" />
 
+### 2. Codebase Indexing
+Enter the path of any local repository folder. Gitty traverses directories, filters out binary/build files, chunks source files, generates embeddings, and saves them to a local vector store.
+<img width="1327" height="599" alt="Gitty Indexing" src="https://github.com/user-attachments/assets/aaac13b1-042a-42aa-840b-d9688c9f4901" />
 
-### 2. Indexing a Project
-Simply paste the path to your local folder. Gitty automatically walks the directory, filters out junk files, chunks the code, generates embeddings, and saves them to a local database.
-!<img width="1327" height="599" alt="Screenshot (30)" src="https://github.com/user-attachments/assets/aaac13b1-042a-42aa-840b-d9688c9f4901" />
-
-### 3. High-Level Repository Overview
-Ask Gitty broad questions like *"what is this repo about"* or *"explain the structure."* It reads the files, summarizes the project, and references the exact files and lines of code it analyzed.
-!<img width="1351" height="599" alt="Screenshot (32)" src="https://github.com/user-attachments/assets/b0e2ef97-274f-4ea9-80c9-0f856f2666c6" />
-
-
+### 3. High-Level Summary Queries
+Submit overview questions (e.g. *"describe the structure"* or *"explain what this project does"*). Gitty aggregates details and displays the source files referenced.
+<img width="1351" height="599" alt="Repository Overview" src="https://github.com/user-attachments/assets/b0e2ef97-274f-4ea9-80c9-0f856f2666c6" />
 
 ### 4. Technical Architecture Questions
-Ask specific architectural questions. Here, Gitty explains how the codebase handles real-time coordinates using Socket.io, showing code snippets and file paths.
-!<img width="1357" height="595" alt="Screenshot (33)" src="https://github.com/user-attachments/assets/22d860c3-9ab4-4879-9e22-f5e06855df2f" />
+Ask architecture-specific details. In the example below, Gitty outlines real-time coordination handlers.
+<img width="1357" height="595" alt="Technical Architecture Query" src="https://github.com/user-attachments/assets/22d860c3-9ab4-4879-9e22-f5e06855df2f" />
 
-
-### 5. Detailed Code Workflows
-Ask Gitty to trace complex workflows across multiple files. It breaks down the workflow step-by-step with file names, socket events, and corresponding logic.
-!<img width="1359" height="605" alt="Screenshot (35)" src="https://github.com/user-attachments/assets/ba86f8c5-f516-46a9-8dfe-7d493475b3f0" />
-<img width="1353" height="593" alt="Screenshot (34)" src="https://github.com/user-attachments/assets/f52eb0b2-24ea-40fd-b1f9-4fa38ac178b5" />
-
+### 5. Detailed Workflows
+Ask questions about control flow across multiple modules to receive step-by-step logic and file references.
+<img width="1359" height="605" alt="Detailed Workflow Explanation" src="https://github.com/user-attachments/assets/ba86f8c5-f516-46a9-8dfe-7d493475b3f0" />
+<img width="1353" height="593" alt="Detailed Workflow Explanation 2" src="https://github.com/user-attachments/assets/f52eb0b2-24ea-40fd-b1f9-4fa38ac178b5" />
 
 ---
 
-##  How Gitty Works (Under the Hood)
+## Architecture & Search Pipeline
 
-Gitty uses a state-of-the-art **Hybrid Search + Reranking RAG pipeline** to ensure Gemini always receives the most relevant parts of your code.
+Gitty combines keyword search and semantic vector search in a hybrid retrieval pipeline.
 
 ```mermaid
 graph TD
@@ -56,7 +49,7 @@ graph TD
     D --> E
     E --> F[Cross-Encoder Reranker]
     F --> G[Top 4 Most Relevant Chunks]
-    G --> H[Gemini 2.5 Flash LLM]
+    G --> H[Gemini 1.5 Flash LLM]
     H --> I[Detailed Answer + Source Code Citations]
     
     style B fill:#7c6fff,stroke:#fff,stroke-width:1px,color:#fff
@@ -64,80 +57,74 @@ graph TD
     style H fill:#4285F4,stroke:#fff,stroke-width:1px,color:#white
 ```
 
-1. **Smart File Parser:** Walks the codebase and extracts clean UTF-8 text from code files (supporting Python, JS, TS, React, HTML, CSS, C++, Go, Rust, etc.). It automatically skips binaries and junk folders like `.git`, `node_modules`, and `venv`.
-2. **Dynamic Code Chunking:** Splitting files using LangChain's `RecursiveCharacterTextSplitter` into overlapping chunks of 800 characters, prioritizing splits at class and function boundaries.
-3. **Local Embedding Generation:** Converts code chunks into mathematical vectors using a free, local model (`sentence-transformers/all-MiniLM-L6-v2`) running on your CPU.
-4. **Hybrid Retrieval:** When you ask a question, Gitty performs two searches in parallel:
-   * **Semantic Search:** Finds code with similar *meaning* using Chroma Vector DB.
-   * **Keyword Search (BM25):** Finds exact matching terms (great for searching specific function or variable names).
-5. **Cross-Encoder Reranking:** Takes the merged search results and re-scores them using a deep learning reranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`) to pick the top 4 most relevant chunks.
-6. **Gemini Generation:** Passes the top chunks to **Gemini 2.5 Flash** as context. Gemini reads the code and constructs a complete, accurate markdown answer.
+1. **File Parser:** Scans directory structure for text-based code files (Python, JS, TS, React, HTML, CSS, C++, Go, Rust, etc.). Files and directories specified in standard ignores (like `.git`, `node_modules`, `venv`) are bypassed.
+2. **Text Chunking:** Splits file contents using LangChain's `RecursiveCharacterTextSplitter` into 800-character segments with 80-character overlap.
+3. **Embeddings:** Generates vector representations locally via `sentence-transformers/all-MiniLM-L6-v2` on CPU.
+4. **Retrieval Search:** Performs parallel query matching:
+   * **Semantic Search:** Matches conceptual similarity using Chroma DB.
+   * **Keyword Search:** Matches exact identifiers and variable occurrences using a BM25 index.
+5. **Reranker:** Ranks merged search results via `cross-encoder/ms-marco-MiniLM-L-6-v2` and selects the top 4 candidates.
+6. **Gemini LLM:** Prompts **Gemini 1.5 Flash** with the top retrieved code chunks to compile a structured answer.
 
 ---
 
-##  Quick Start
+## Setup & Quick Start
 
 ### Prerequisites
 *   **Python 3.11** (Recommended)
-*   A **Gemini API Key** (Get one for free at [Google AI Studio](https://aistudio.google.com/app/apikey))
+*   **Gemini API Key** (Accessible from [Google AI Studio](https://aistudio.google.com/app/apikey))
 
-### 1. Setup the Codebase
-Clone Gitty and open a terminal in the folder:
+### 1. Installation
+Clone the repository and install requirements in a virtual environment:
 
 ```bash
-# Create a virtual environment
+# Create virtual environment
 python -m venv venv
 
-# Activate the virtual environment
-# On Windows:
+# Activate virtual environment
+# Windows:
 .\venv\Scripts\Activate.ps1
-# On Mac/Linux:
+# Mac/Linux:
 source venv/bin/activate
 
-# Install all requirements
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment Variables
-Create a file named `.env` in the root directory:
+### 2. Environment Variables
+Create a `.env` file in the root directory:
 
 ```env
 GEMINI_API_KEY=AIzaSyYourGeminiApiKeyHere
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-1.5-flash
 ANON_TELEMETRY=False
 ```
-*(Do not put quotation marks around the API key or model name).*
 
-### 3. Start Gitty
-Run the backend server:
+### 3. Start Backend Server
+Launch the application:
 ```bash
 python main.py
 ```
-You should see the startup message:
-```text
-[✓] Environment loaded
-[→] Starting API server on http://localhost:8000
-```
 
-### 4. Open the Interface
-Navigate to the `frontend/` folder and double-click **`index.html`** to open the web interface in your browser.
+### 4. Access UI
+Open **`frontend/index.html`** directly in a web browser.
 
 ---
 
-##  API Reference
+## API Documentation
 
-Gitty exposes a clean REST API using FastAPI. You can access the interactive Swagger documentation at `http://localhost:8000/docs`.
+FastAPI provides endpoint documentation at `http://localhost:8000/docs`.
 
-| Endpoint | Method | Description | Request Body / Response |
+| Endpoint | Method | Purpose | Payload / Response |
 | :--- | :---: | :--- | :--- |
-| `/health` | `GET` | Checks server status and index readiness | Returns connection and chunk count |
-| `/index` | `POST` | Wipes the old database and indexes a new local folder | `{"folder_path": "C:/path/to/project"}` |
-| `/ask` | `POST` | Sends query, retrieves context, and answers | `{"query": "Where is the auth logic?"}` |
-| `/status` | `GET` | Returns details about the currently indexed codebase | Returns folder path and total chunks |
+| `/health` | `GET` | Return server availability status | Connection indicators and cached chunk metrics |
+| `/index` | `POST` | Wipe existing DB store and index directory | `{"folder_path": "/path/to/project"}` |
+| `/ask` | `POST` | Retrieve context and answer query | `{"query": "Query text here"}` |
+| `/status` | `GET` | Return current indexed path metrics | Folder name and total chunks count |
 
 ---
 
-##  Project Structure
+## Directory Structure
 
 ```text
 gitty/
@@ -159,4 +146,4 @@ gitty/
 ---
 
 ## License
-This project is licensed under the MIT License. Feel free to use and modify it.
+MIT License.
